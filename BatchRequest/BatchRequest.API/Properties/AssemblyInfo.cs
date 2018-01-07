@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("BatchRequest.API")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("BatchRequest.API")]
-[assembly: AssemblyCopyright("版权所有(C) Microsoft 2016")]
+[assembly: AssemblyCopyright("版权所有(C)  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
-[assembly: Guid("7be3878b-dfd3-442a-8f53-e09745597b9d")]
+[assembly: Guid("7d9a8d07-24e3-4a70-b258-201829718545")]
 
 // 程序集的版本信息由下列四个值组成:
 //

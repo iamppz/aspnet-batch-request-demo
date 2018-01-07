@@ -1,15 +1,21 @@
-﻿using System.Net;
-using System.Net.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 using System.Web.Http;
+using System.Web.Mvc;
 
 namespace BatchRequest.API.Controllers
 {
-    public class TestController : ApiController
+    public class TestController : Controller
     {
-        [HttpGet]
-        public HttpResponseMessage Index()
+        //
+        // GET: /Test/
+
+        public ActionResult Index()
         {
-            return Request.CreateResponse(HttpStatusCode.OK, "OK");
+            return View();
         }
+
     }
 }

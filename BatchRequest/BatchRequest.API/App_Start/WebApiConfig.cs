@@ -1,4 +1,7 @@
-﻿using System.Web.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Http;
 
 namespace BatchRequest.API
 {
@@ -6,17 +9,11 @@ namespace BatchRequest.API
     {
         public static void Register(HttpConfiguration config)
         {
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.LocalOnly;
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
-                routeTemplate: "{controller}/{id}",
-                defaults: new
-                {
-                    controller = "default",
-                    id = RouteParameter.Optional
-                }
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional }
             );
-           
         }
     }
 }

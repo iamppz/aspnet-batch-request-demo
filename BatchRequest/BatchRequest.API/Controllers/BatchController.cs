@@ -1,20 +1,20 @@
-﻿using System.Net;
-using System.Net.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web;
-using System.Web.Http;
+using System.Web.Mvc;
 
 namespace BatchRequest.API.Controllers
 {
-    public class BatchController : ApiController
+    public class BatchController : Controller
     {
-        [HttpGet]
-        public HttpResponseMessage Dispatch()
+        //
+        // GET: /Batch/
+
+        public ActionResult Index()
         {
-            var uri = HttpContext.Current.Request.Url;
-            var services = GlobalConfiguration.Configuration.Services;
-            var request = new HttpRequestMessage(HttpMethod.Get, "/test");
-            var controllers = services.GetHttpControllerSelector().SelectController(request);
-            return Request.CreateResponse(HttpStatusCode.OK);
+            return View();
         }
+
     }
 }
