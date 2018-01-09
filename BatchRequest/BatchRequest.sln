@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchRequest.API", "BatchRe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchRequest.SDK", "BatchRequest.SDK\BatchRequest.SDK.csproj", "{1B11D314-8A1D-45D2-9054-B4636513ADDD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchRequest.SDK.Demo", "BatchRequest.SDK.Demo\BatchRequest.SDK.Demo.csproj", "{1E9283A9-A864-487D-8786-B229D56FFD39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1B11D314-8A1D-45D2-9054-B4636513ADDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B11D314-8A1D-45D2-9054-B4636513ADDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B11D314-8A1D-45D2-9054-B4636513ADDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E9283A9-A864-487D-8786-B229D56FFD39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E9283A9-A864-487D-8786-B229D56FFD39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E9283A9-A864-487D-8786-B229D56FFD39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E9283A9-A864-487D-8786-B229D56FFD39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

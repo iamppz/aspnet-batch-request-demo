@@ -16,12 +16,13 @@ namespace BatchRequest.SDK
             content.Append("--").Append(boundary).Append(Environment.NewLine);
             content.Append("Content-Type: application/http; msgtype=request").Append(Environment.NewLine);
             content.Append("\n");
-            content.Append("GET /").Append(uri.ToString()).Append(" ").Append("HTTP/1.1").Append(Environment.NewLine);
+            content.Append("GET ").Append(uri.AbsolutePath).Append(" ").Append("HTTP/1.1").Append(Environment.NewLine);
             content.Append(Environment.NewLine);
             content.Append(Environment.NewLine);
 
             var client = new HttpClient();
-            var stringContent = new StringContent(content.ToString());
+            var stringContent = new StringContent(content.ToString(), Encoding.UTF8, "multipart/mixed; boundary=" + boundary);
+            Console.WriteLine(stringContent.ReadAsStringAsync().Result);
             var result = client.PostAsync(uri, stringContent).Result;
         }
     }
