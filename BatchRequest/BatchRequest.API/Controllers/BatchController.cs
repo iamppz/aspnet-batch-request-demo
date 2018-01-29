@@ -5,43 +5,118 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using Newtonsoft.Json;
+using System.Web;
+using System;
 
 namespace BatchRequest.API.Controllers
 {
     public class BatchController : ApiController
     {
-        [HttpGet]
-        public HttpResponseMessage Dispatch()
+        private static readonly IEnumerable<WebAPIDescriptor> descriptors = new List<WebAPIDescriptor>();
+        private static readonly string boundaryPrefix = "--";
+        private static readonly string apiPrefix = "/api";
+        private static readonly string ns = "BatchRequest.API.Controllers";
+
+        static BatchController()
         {
-            var controllers = GlobalConfiguration.Configuration.Services.GetHttpControllerSelector()
-                .GetControllerMapping();
-            IEnumerable<string> result = new List<string>();
-            foreach (var controller in controllers)
+            var controllers = GlobalConfiguration.Configuration.Services
+                .GetHttpControllerSelector().GetControllerMapping();
+            foreach (var ctl in controllers)
             {
                 var actions = GlobalConfiguration.Configuration.Services.GetActionSelector()
-                    .GetActionMapping(controller.Value);
-                result = actions.Aggregate(result, (current, action) => current.Union(Actions(controller.Key, action)));
+                    .GetActionMapping(ctl.Value);
+                descriptors = actions.Aggregate(descriptors, 
+                    (current, action) => current.Union(Actions(ctl.Key, action)));
             }
-
-            return Request.CreateResponse(HttpStatusCode.OK, JsonConvert.SerializeObject(result));
         }
 
-        private static IEnumerable<string> Actions(string controllerName, IEnumerable<HttpActionDescriptor> action)
+        [HttpPost]
+        public HttpResponseMessage Dispatch()
         {
-            return action.Select(i => Method(i) + " /" + controllerName + "/" + i.ActionName + "?" + Parameters(i));
+            var request = HttpContext.Current.Request;
+            string boundary;
+            try
+            {
+                boundary = request.ContentType.Replace("multipart/related; boundary=", string.Empty);
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "INVALID_BOUNDARY");
+            }
+            if (string.IsNullOrWhiteSpace(boundary))
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "EMPTY_BOUNDARY");
+            }
+            var content = Request.Content.ReadAsStringAsync().Result;
+            var contentParts = content.Split(new [] { boundaryPrefix + boundary }, StringSplitOptions.RemoveEmptyEntries);
+            var results = contentParts.Select(part => Execute(part));
+            return Request.CreateResponse(HttpStatusCode.OK, JsonConvert.SerializeObject(results));
         }
 
-        private static string Method(HttpActionDescriptor action)
+        [HttpGet]
+        public HttpResponseMessage PrintAPIs()
         {
-            return action.SupportedHttpMethods.First().Method;
+            return Request.CreateResponse(HttpStatusCode.OK, JsonConvert.SerializeObject(descriptors));
         }
 
-        private static string Parameters(HttpActionDescriptor action)
+        private object Execute(string requestContentPart)
         {
-            var result = action.GetParameters().Aggregate("",
-                (last, p) =>
-                    last + "," + p.ParameterName + ":" + p.ParameterType.Name);
-            return result.Any() ? result.Remove(0, 1) : result;
+            var lines = requestContentPart.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            string httpMethod;
+            string url;
+            try
+            {
+                string requestInfo = lines[1];
+                var fields = requestInfo.Split(' ');
+                httpMethod = fields[0];
+                url = fields[1];
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "INVALID_CONTENT_PART");
+            }
+            var infos = descriptors.Where(a =>
+            string.Equals(a.Url, url, StringComparison.InvariantCultureIgnoreCase)
+            && a.Method == httpMethod);
+            if (!infos.Any())
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "NOT_FOUND");
+            }
+            if (infos.Count() > 0)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "AMBIGUOUS");
+            }
+            var reflectInfo = url.Replace(apiPrefix, string.Empty).Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
+            var type = Type.GetType(ns + "." + reflectInfo[0] + "Controller");
+            if (type == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "CLASS_NOT_FOUND");
+            }
+            var instance = Activator.CreateInstance(type);
+            var method = type.GetMethod(reflectInfo[1]);
+            if (method == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "METHOD_NOT_FOUND");
+            }
+            return Request.CreateResponse(HttpStatusCode.BadRequest, method.Invoke(instance, null));
         }
+
+        private static IEnumerable<WebAPIDescriptor> Actions(string controllerName, IEnumerable<HttpActionDescriptor> descriptors)
+        {
+            return descriptors.Select(desc => new WebAPIDescriptor
+            {
+                Method = desc.SupportedHttpMethods.First().Method,
+                Url = apiPrefix + "/" + controllerName + "/" + desc.ActionName,
+                Parameters = string.Join(",", desc.GetParameters().Select(p => p.ParameterName + ":" + p.ParameterType))
+            });
+        }
+    }
+
+    class WebAPIDescriptor
+    {
+        public string Method { get; set; }
+        public string Url { get; set; }
+        public string Parameters { get; set; }
     }
 }
